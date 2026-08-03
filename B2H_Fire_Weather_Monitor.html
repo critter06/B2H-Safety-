@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>B2H Fire Weather Trigger Monitor</title>
+<style>
+  :root{--infrared:#CD0A1B;--bolt:#F0941C;--carbon:#221F1F;--go:#1C7C3C;--stop:#CD0A1B;--warn:#F0941C;--paper:#F7F6F4;--line:#DAD9D9;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Arial,sans-serif;background:var(--paper);color:var(--carbon)}
+  header{background:var(--carbon);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header .bar{width:6px;height:40px;background:var(--infrared);border-radius:2px}
+  header h1{font-size:17px;margin:0;letter-spacing:.3px}
+  header .sub{font-size:11px;color:#B4B2A9;margin-top:2px}
+  .rule{margin-left:auto;font-size:11px;color:#DAD9D9;text-align:right;line-height:1.5}
+  .rule b{color:var(--bolt)}
+  .controls{padding:10px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+  button{background:var(--carbon);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+  button:hover{background:#000}
+  .updated{font-size:12px;color:#716F6F}
+  .legend{margin-left:auto;font-size:11px;color:#716F6F;display:flex;gap:14px;align-items:center}
+  .chip{display:inline-flex;align-items:center;gap:5px}
+  .sw{width:12px;height:12px;border-radius:3px}
+  main{padding:16px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;max-width:1400px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;border-left:6px solid var(--line)}
+  .card.go{border-left-color:var(--go)}
+  .card.stop{border-left-color:var(--stop)}
+  .card.warn{border-left-color:var(--warn)}
+  .card.err{border-left-color:#999}
+  .ch{padding:11px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .seg{font-size:15px;font-weight:700}
+  .rng{font-size:11px;color:#716F6F;margin-top:2px}
+  .stn{font-size:10px;color:#A3A1A1;margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+  .status{font-size:13px;font-weight:800;padding:5px 10px;border-radius:6px;white-space:nowrap;color:#fff}
+  .status.go{background:var(--go)}.status.stop{background:var(--stop)}.status.warn{background:var(--warn);color:#221F1F}.status.err{background:#999}
+  .metrics{display:flex;border-top:1px solid var(--line)}
+  .metric{flex:1;padding:11px 14px;text-align:center;border-right:1px solid var(--line)}
+  .metric:last-child{border-right:none}
+  .mv{font-size:24px;font-weight:800;line-height:1}
+  .ml{font-size:10px;color:#716F6F;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+  .mv.bad{color:var(--stop)}.mv.ok{color:var(--go)}
+  .note{padding:8px 14px;font-size:11px;color:#716F6F;border-top:1px dashed var(--line);background:#FBFBFA}
+  footer{padding:14px 18px;font-size:11px;color:#8B8A8A;border-top:1px solid var(--line);line-height:1.6}
+  .banner{padding:10px 18px;font-size:13px;font-weight:600;text-align:center}
+  .banner.anystop{background:#FBE3E5;color:var(--stop)}
+  .banner.allgo{background:#E1F2E7;color:var(--go)}
+</style></head><body>
+<header>
+  <div class="bar"></div>
+  <div>
+    <h1>B2H FIRE WEATHER TRIGGER MONITOR</h1>
+    <div class="sub">Boardman to Hemingway 500kV · Project 032 · QISG · live NWS observations</div>
+  </div>
+  <div class="rule">
+    SHUTDOWN TRIGGER: <b>RH &lt; 25%</b> AND <b>wind &gt; 6 mph</b><br>
+    Applies to: all off-landing activity · non-stationary tracked equipment
+  </div>
+</header>
+<div class="controls">
+  <button onclick="loadAll()">↻ Refresh conditions</button>
+  <span class="updated" id="updated">Loading…</span>
+  <span class="legend">
+    <span class="chip"><span class="sw" style="background:var(--go)"></span>OK to work</span>
+    <span class="chip"><span class="sw" style="background:var(--warn)"></span>Near trigger</span>
+    <span class="chip"><span class="sw" style="background:var(--stop)"></span>SHUTDOWN</span>
+  </span>
+</div>
+<div id="banner"></div>
+<main id="cards"></main>
+<footer>
+  <b>How this works:</b> Pulls current relative humidity and wind speed from the nearest NWS station to each corridor segment (api.weather.gov, updates ~hourly). A segment shows <b>SHUTDOWN</b> when RH is below 25% AND sustained wind exceeds 6 mph — both conditions must be true. "Near trigger" (amber) means one condition is met and the other is within 3 units — watch closely.<br>
+  <b>Important:</b> Station readings represent the nearest ASOS/airport, which may differ from on-site conditions in canyons, ridgetops, or the USFS crossing. Station data does not replace on-site measurement — crews must verify with a calibrated handheld at the work location and log readings. Wind gusts are shown separately; the trigger uses sustained wind. When in doubt, stop. · Stations: KMEH (Blue Mtn approach), KLGD (USFS crossing &amp; Union County zones). Monitoring only active structure ranges: 85/2–91/1, 91/5, 90/4 &amp; 92/1–99/1, 110/4–115/1, 115/4–117/1.
+</footer>
+<script>
+var STATIONS=[{"id": "KMEH", "name": "Meacham", "seg": "Blue Mtn approach", "range": "85/2 \u2013 91/1, 91/5", "lat": 45.51, "lon": -118.42}, {"id": "KLGD", "name": "La Grande", "seg": "USFS Crossing (Whitman / Section 5)", "range": "90/4, 92/1 \u2013 99/1", "lat": 45.29, "lon": -118.01}, {"id": "KLGD", "name": "La Grande", "seg": "Union County (south)", "range": "110/4 \u2013 115/1", "lat": 45.29, "lon": -118.01}, {"id": "KLGD", "name": "La Grande", "seg": "Union County (south, cont.)", "range": "115/4 \u2013 117/1", "lat": 45.29, "lon": -118.01}];
+var RH_LIMIT=25, WIND_LIMIT=6;
+function cToF(c){return c*9/5+32;}
+function msToMph(ms){return ms*2.23694;}
+async function fetchStation(s){
+  try{
+    const r=await fetch(`https://api.weather.gov/stations/${s.id}/observations/latest`,{headers:{'Accept':'application/geo+json'}});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json();const p=d.properties;
+    let rh=p.relativeHumidity&&p.relativeHumidity.value!=null?p.relativeHumidity.value:null;
+    let wind=p.windSpeed&&p.windSpeed.value!=null?msToMph(p.windSpeed.value):null; // API returns m/s or km/h? unit in unitCode
+    // windSpeed unitCode is usually wmoUnit:km_h-1 or m_s-1
+    if(p.windSpeed&&p.windSpeed.unitCode&&p.windSpeed.unitCode.indexOf('km_h')>=0&&p.windSpeed.value!=null){wind=p.windSpeed.value*0.621371;}
+    let gust=p.windGust&&p.windGust.value!=null?(p.windGust.unitCode&&p.windGust.unitCode.indexOf('km_h')>=0?p.windGust.value*0.621371:msToMph(p.windGust.value)):null;
+    let temp=p.temperature&&p.temperature.value!=null?cToF(p.temperature.value):null;
+    let t=p.timestamp?new Date(p.timestamp):null;
+    return {rh,wind,gust,temp,t};
+  }catch(e){return {error:e.message};}
+}
+function evalTrigger(rh,wind){
+  if(rh==null||wind==null) return 'err';
+  const rhBad=rh<RH_LIMIT, windBad=wind>WIND_LIMIT;
+  if(rhBad&&windBad) return 'stop';
+  // near-trigger: one condition met and other within 3
+  if((rhBad&&wind>WIND_LIMIT-3)||(windBad&&rh<RH_LIMIT+3)) return 'warn';
+  return 'go';
+}
+function statusLabel(st){return st==='stop'?'SHUTDOWN':st==='warn'?'NEAR TRIGGER':st==='go'?'OK TO WORK':'NO DATA';}
+async function loadAll(){
+  document.getElementById('updated').textContent='Fetching…';
+  const cards=document.getElementById('cards');cards.innerHTML='';
+  let anyStop=false, anyData=false;
+  const results=await Promise.all(STATIONS.map(fetchStation));
+  STATIONS.forEach((s,i)=>{
+    const o=results[i];
+    let st,rhTxt,windTxt,gustTxt,tTxt,note='';
+    if(o.error){st='err';rhTxt=windTxt=gustTxt='—';note='Station data unavailable: '+o.error;}
+    else{
+      anyData=true;
+      st=evalTrigger(o.rh,o.wind);
+      if(st==='stop')anyStop=true;
+      rhTxt=o.rh!=null?Math.round(o.rh)+'%':'—';
+      windTxt=o.wind!=null?o.wind.toFixed(1):'—';
+      gustTxt=o.gust!=null?o.gust.toFixed(0)+' mph gust':'no gust data';
+      tTxt=o.t?o.t.toLocaleString():'';
+      note='Obs: '+tTxt+(o.temp!=null?' · '+Math.round(o.temp)+'°F':'');
+    }
+    const rhBad=o.rh!=null&&o.rh<RH_LIMIT, windBad=o.wind!=null&&o.wind>WIND_LIMIT;
+    const card=document.createElement('div');card.className='card '+st;
+    card.innerHTML=`
+      <div class="ch">
+        <div><div class="seg">${s.seg}</div><div class="rng">Structures ${s.range}</div>
+          <div class="stn">${s.id} · ${s.name}</div></div>
+        <div class="status ${st}">${statusLabel(st)}</div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="mv ${rhBad?'bad':'ok'}">${rhTxt}</div><div class="ml">Rel. Humidity ${rhBad?'&lt;25':''}</div></div>
+        <div class="metric"><div class="mv ${windBad?'bad':'ok'}">${windTxt}</div><div class="ml">Wind mph ${windBad?'&gt;6':''}</div></div>
+        <div class="metric"><div class="mv" style="font-size:14px;color:#716F6F;padding-top:5px">${gustTxt}</div><div class="ml">Gust</div></div>
+      </div>
+      <div class="note">${note}</div>`;
+    cards.appendChild(card);
+  });
+  const banner=document.getElementById('banner');
+  if(anyStop){banner.className='banner anystop';banner.textContent='⚠ SHUTDOWN CONDITIONS ACTIVE ON ONE OR MORE SEGMENTS — verify on-site and stop affected work';}
+  else if(anyData){banner.className='banner allgo';banner.textContent='✓ No segment currently meets both shutdown conditions — continue to monitor and verify on-site';}
+  else{banner.className='';banner.textContent='';}
+  document.getElementById('updated').textContent='Updated '+new Date().toLocaleTimeString();
+}
+loadAll();
+setInterval(loadAll, 15*60*1000); // auto-refresh every 15 min
+</script></body></html>
