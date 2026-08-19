@@ -50,7 +50,7 @@
   <div class="bar"></div>
   <div>
     <h1>B2H FIRE WEATHER TRIGGER MONITOR</h1>
-    <div class="sub">Boardman to Hemingway 500kV · Project 032 · QISG · scoped to active work zones · live NWS observations + alerts</div>
+    <div class="sub">Boardman to Hemingway 500kV · Project 032 · QISG · full corridor · live NWS observations + alerts</div>
   </div>
   <div class="rule">
     SHUTDOWN TRIGGER: <b>RH &lt; 25%</b> AND <b>wind &gt; 6 mph</b><br>
@@ -72,11 +72,11 @@
 <div id="rfwGlobalBanner"></div>
 <main id="cards"></main>
 <footer>
-  <b>How this works:</b> Pulls current relative humidity and wind speed from the nearest NWS station to each corridor segment (api.weather.gov, updates ~hourly), and separately checks api.weather.gov/alerts/active for any official <b>Red Flag Warning</b> or <b>Fire Weather Watch</b> covering that segment's coordinates. A segment shows <b>SHUTDOWN</b> when RH is below 25% AND sustained wind exceeds 6 mph — both conditions must be true. The Red Flag indicator is separate and independent — it reflects the National Weather Service's own official warning product, which uses different criteria (typically lower RH thresholds and higher sustained wind/gust thresholds, varying by local forecast office) and can be active even when the project's RH/wind trigger is not, or vice versa. Treat a Red Flag Warning as a serious independent signal regardless of the project trigger's status.<br>
-  <b>Important:</b> Station readings represent the nearest ASOS/airport, which may differ from on-site conditions in canyons, ridgetops, or the USFS crossing. Station data does not replace on-site measurement — crews must verify with a calibrated handheld at the work location and log readings. When in doubt, stop. · Stations: KMEH, KLGD.
+  <b>How this works:</b> Pulls current relative humidity and wind speed from the nearest NWS station to each corridor segment (api.weather.gov, updates ~hourly), and separately checks api.weather.gov/alerts/active for any official <b>Red Flag Warning</b> or <b>Fire Weather Watch</b> covering that segment's coordinates. A segment shows <b>SHUTDOWN</b> when RH is below 25% AND sustained wind exceeds 6 mph — both conditions must be true. The Red Flag indicator is separate and independent — it reflects the National Weather Service's own official warning product, which uses different criteria and can be active even when the project's RH/wind trigger is not, or vice versa. Treat a Red Flag Warning as a serious independent signal regardless of the project trigger's status.<br>
+  <b>Important:</b> Station readings represent the nearest ASOS/airport, which may differ from on-site conditions in canyons, ridgetops, or river/valley segments. Station data does not replace on-site measurement — crews must verify with a calibrated handheld at the work location and log readings. When in doubt, stop. · Stations: KHRI, KPDT, KMEH, KLGD, KBKE, KONO.
 </footer>
 <script>
-var STATIONS=[{"id": "KMEH", "name": "Meacham", "seg": "Blue Mtn approach", "range": "85/2 \u2013 91/1, 91/5", "lat": 45.51, "lon": -118.42}, {"id": "KLGD", "name": "La Grande", "seg": "USFS Crossing (Whitman / Section 5)", "range": "90/4, 92/1 \u2013 99/1", "lat": 45.29, "lon": -118.01}, {"id": "KLGD", "name": "La Grande", "seg": "Union County (south)", "range": "110/4 \u2013 115/1", "lat": 45.29, "lon": -118.01}, {"id": "KLGD", "name": "La Grande", "seg": "Union County (south, cont.)", "range": "115/4 \u2013 117/1", "lat": 45.29, "lon": -118.01}];
+var STATIONS=[{"id": "KHRI", "name": "Hermiston", "seg": "North / Morrow", "range": "~1/1 \u2013 40/x", "lat": 45.83, "lon": -119.26}, {"id": "KPDT", "name": "Pendleton", "seg": "Umatilla", "range": "~40/x \u2013 75/x", "lat": 45.69, "lon": -118.85}, {"id": "KMEH", "name": "Meacham", "seg": "Blue Mtn Summit", "range": "~75/x \u2013 88/3", "lat": 45.51, "lon": -118.42}, {"id": "KLGD", "name": "La Grande", "seg": "Union (incl. USFS crossing 90\u201399)", "range": "88/4 \u2013 118/1", "lat": 45.29, "lon": -118.01}, {"id": "KBKE", "name": "Baker City", "seg": "Baker Valley", "range": "~120/x \u2013 198/1", "lat": 44.84, "lon": -117.81}, {"id": "KONO", "name": "Ontario", "seg": "Malheur / Owyhee", "range": "~200/x \u2013 295/x", "lat": 44.02, "lon": -116.97}];
 var RH_LIMIT=25, WIND_LIMIT=6;
 function msToMph(ms){return ms*2.23694;}
 async function fetchStation(s){
