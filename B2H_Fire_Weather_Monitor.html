@@ -141,7 +141,8 @@ async function fetchHistory(stationId){
       let wind = p.windSpeed&&p.windSpeed.value!=null?msToMph(p.windSpeed.value):null;
       if(p.windSpeed&&p.windSpeed.unitCode&&p.windSpeed.unitCode.indexOf('km_h')>=0&&p.windSpeed.value!=null){wind=p.windSpeed.value*0.621371;}
       let gust = p.windGust&&p.windGust.value!=null?(p.windGust.unitCode&&p.windGust.unitCode.indexOf('km_h')>=0?p.windGust.value*0.621371:msToMph(p.windGust.value)):null;
-      return {t:new Date(p.timestamp), rh, wind, gust};
+      let temp = p.temperature&&p.temperature.value!=null?(p.temperature.value*9/5+32):null;
+      return {t:new Date(p.timestamp), rh, wind, gust, temp};
     }).filter(r=>r.rh!=null||r.wind!=null).sort((a,b)=>b.t-a.t);
     histCache[stationId]=rows;
     return rows;
@@ -155,11 +156,12 @@ async function toggleHistory(key, stationId){
   el.innerHTML = '<div class="histloading">Loading 7-day history…</div>';
   const rows = await fetchHistory(stationId);
   if(!rows){ el.innerHTML = '<div class="histloading">History unavailable for this station.</div>'; return; }
-  let tbl = '<table class="histtbl"><thead><tr><th>Time (local)</th><th>RH %</th><th>Wind mph</th><th>Gust</th></tr></thead><tbody>';
+  let tbl = '<table class="histtbl"><thead><tr><th>Time (local)</th><th>Temp \u00b0F</th><th>RH %</th><th>Wind mph</th><th>Gust</th></tr></thead><tbody>';
   rows.forEach(r=>{
     const rhBad = r.rh!=null && r.rh<RH_LIMIT;
     const windBad = r.wind!=null && r.wind>WIND_LIMIT;
     tbl += `<tr><td>${r.t.toLocaleString()}</td>`+
+      `<td>${r.temp!=null?Math.round(r.temp)+'\u00b0':'—'}</td>`+
       `<td class="${rhBad?'histbad':''}">${r.rh!=null?Math.round(r.rh)+'%':'—'}</td>`+
       `<td class="${windBad?'histbad':''}">${r.wind!=null?r.wind.toFixed(1):'—'}</td>`+
       `<td>${r.gust!=null?r.gust.toFixed(0):'—'}</td></tr>`;
@@ -179,16 +181,17 @@ async function loadAll(){
   const rfwResults=await Promise.all(STATIONS.map(fetchRedFlag));
   STATIONS.forEach((s,i)=>{
     const o=results[i]; const rfw=rfwResults[i];
-    let st,rhTxt,windTxt,gustTxt,tTxt,note='';
-    if(o.error){st='err';rhTxt=windTxt=gustTxt='—';note='Station data unavailable: '+o.error;}
+    let st,rhTxt,windTxt,gustTxt,tempTxt,tTxt,note='';
+    if(o.error){st='err';rhTxt=windTxt=gustTxt=tempTxt='—';note='Station data unavailable: '+o.error;}
     else{
       st=evalTrigger(o.rh,o.wind);
       if(st==='stop')anyStop=true;
       rhTxt=o.rh!=null?Math.round(o.rh)+'%':'—';
       windTxt=o.wind!=null?o.wind.toFixed(1):'—';
       gustTxt=o.gust!=null?o.gust.toFixed(0)+' mph gust':'no gust data';
+      tempTxt=o.temp!=null?Math.round(o.temp)+'°':'—';
       tTxt=o.t?o.t.toLocaleString():'';
-      note='Obs: '+tTxt+(o.temp!=null?' · '+Math.round(o.temp)+'°F':'');
+      note='Obs: '+tTxt;
     }
     if(rfw.length>0) anyRFW=true;
     const rhBad=o.rh!=null&&o.rh<RH_LIMIT, windBad=o.wind!=null&&o.wind>WIND_LIMIT;
@@ -208,6 +211,7 @@ async function loadAll(){
         <div class="metric"><div class="mv ${rhBad?'bad':'ok'}">${rhTxt}</div><div class="ml">Rel. Humidity ${rhBad?'&lt;20':''}</div></div>
         <div class="metric"><div class="mv ${windBad?'bad':'ok'}">${windTxt}</div><div class="ml">Wind mph ${windBad?'&gt;6':''}</div></div>
         <div class="metric"><div class="mv" style="font-size:14px;color:#716F6F;padding-top:5px">${gustTxt}</div><div class="ml">Gust</div></div>
+        <div class="metric"><div class="mv" style="font-size:18px;color:#221F1F;padding-top:3px">${tempTxt}</div><div class="ml">Temp &deg;F</div></div>
       </div>
       <div class="note">${note}</div>
       <button class="histbtn" onclick="toggleHistory('${s.id}_${i}', '${s.id}')">📈 Show recent history</button>
