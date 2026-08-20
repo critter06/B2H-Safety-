@@ -45,6 +45,16 @@
   .banner.anystop{background:#FBE3E5;color:var(--stop)}
   .banner.allgo{background:#E1F2E7;color:var(--go)}
   .banner.rfw{background:#F3E6FB;color:var(--rfw)}
+  .histbtn{background:none;border:1px solid var(--line);color:var(--carbon);font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;margin:0 14px 10px}
+  .histbtn:hover{background:#F0F0EE}
+  .histwrap{display:none;padding:0 14px 12px;max-height:220px;overflow-y:auto}
+  .histwrap.show{display:block}
+  .histtbl{width:100%;border-collapse:collapse;font-size:11px}
+  .histtbl th{position:sticky;top:0;background:#221F1F;color:#fff;padding:5px 6px;text-align:left}
+  .histtbl td{padding:4px 6px;border-bottom:1px solid #EEE}
+  .histtbl tr:nth-child(even){background:#FBFBFA}
+  .histbad{color:var(--stop);font-weight:700}
+  .histloading{padding:8px 14px;font-size:11px;color:#8B8A8A}
 </style></head><body>
 <header>
   <div class="bar"></div>
@@ -53,7 +63,7 @@
     <div class="sub">Boardman to Hemingway 500kV · Project 032 · QISG · full corridor · live NWS observations + alerts</div>
   </div>
   <div class="rule">
-    SHUTDOWN TRIGGER: <b>RH &lt; 25%</b> AND <b>wind &gt; 6 mph</b><br>
+    SHUTDOWN TRIGGER: <b>RH &lt; 20%</b> AND <b>wind &gt; 6 mph</b><br>
     Applies to: all off-landing activity · non-stationary tracked equipment<br>
     Also flags: official NWS <b style="color:#7A0BC0">Red Flag Warnings</b>
   </div>
@@ -72,12 +82,12 @@
 <div id="rfwGlobalBanner"></div>
 <main id="cards"></main>
 <footer>
-  <b>How this works:</b> Pulls current relative humidity and wind speed from the nearest NWS station to each corridor segment (api.weather.gov, updates ~hourly), and separately checks api.weather.gov/alerts/active for any official <b>Red Flag Warning</b> or <b>Fire Weather Watch</b> covering that segment's coordinates. A segment shows <b>SHUTDOWN</b> when RH is below 25% AND sustained wind exceeds 6 mph — both conditions must be true. The Red Flag indicator is separate and independent — it reflects the National Weather Service's own official warning product, which uses different criteria and can be active even when the project's RH/wind trigger is not, or vice versa. Treat a Red Flag Warning as a serious independent signal regardless of the project trigger's status.<br>
-  <b>Important:</b> Station readings represent the nearest ASOS/airport, which may differ from on-site conditions in canyons, ridgetops, or river/valley segments. Station data does not replace on-site measurement — crews must verify with a calibrated handheld at the work location and log readings. When in doubt, stop. · Stations: KHRI, KPDT, KMEH, KLGD, KBKE, KONO.
+  <b>How this works:</b> Pulls current relative humidity and wind speed from the nearest NWS station to each corridor segment (api.weather.gov, updates ~hourly), and separately checks api.weather.gov/alerts/active for any official <b>Red Flag Warning</b> or <b>Fire Weather Watch</b> covering that segment's coordinates. A segment shows <b>SHUTDOWN</b> when RH is below 20% AND sustained wind exceeds 6 mph — both conditions must be true. The Red Flag indicator is separate and independent — it reflects the National Weather Service's own official warning product, which uses different criteria and can be active even when the project's RH/wind trigger is not, or vice versa. Treat a Red Flag Warning as a serious independent signal regardless of the project trigger's status.<br>
+  <b>Important:</b> Station readings represent the nearest ASOS/airport, which may differ from on-site conditions in canyons, ridgetops, or river/valley segments. Station data does not replace on-site measurement — crews must verify with a calibrated handheld at the work location and log readings. When in doubt, stop. · Stations: KHRI, KPDT, KMEH, KLGD, KBKE, KONO. <b>7-day history</b> (per-zone button) pulls actual past hourly NWS observations for that station — useful for spotting trends, not just the current snapshot.
 </footer>
 <script>
 var STATIONS=[{"id": "KHRI", "name": "Hermiston", "seg": "North / Morrow", "range": "~1/1 \u2013 40/x", "lat": 45.83, "lon": -119.26}, {"id": "KPDT", "name": "Pendleton", "seg": "Umatilla", "range": "~40/x \u2013 75/x", "lat": 45.69, "lon": -118.85}, {"id": "KMEH", "name": "Meacham", "seg": "Blue Mtn Summit", "range": "~75/x \u2013 88/3", "lat": 45.51, "lon": -118.42}, {"id": "KLGD", "name": "La Grande", "seg": "Union (incl. USFS crossing 90\u201399)", "range": "88/4 \u2013 118/1", "lat": 45.29, "lon": -118.01}, {"id": "KBKE", "name": "Baker City", "seg": "Baker Valley", "range": "~120/x \u2013 198/1", "lat": 44.84, "lon": -117.81}, {"id": "KONO", "name": "Ontario", "seg": "Malheur / Owyhee", "range": "~200/x \u2013 295/x", "lat": 44.02, "lon": -116.97}];
-var RH_LIMIT=25, WIND_LIMIT=6;
+var RH_LIMIT=20, WIND_LIMIT=6;
 function msToMph(ms){return ms*2.23694;}
 async function fetchStation(s){
   try{
@@ -114,6 +124,53 @@ function evalTrigger(rh,wind){
   return 'go';
 }
 function statusLabel(st){return st==='stop'?'SHUTDOWN':st==='warn'?'NEAR TRIGGER':st==='go'?'OK TO WORK':'NO DATA';}
+
+var histCache = {};
+async function fetchHistory(stationId){
+  if(histCache[stationId]) return histCache[stationId];
+  const end = new Date();
+  const start = new Date(end.getTime() - 7*24*3600*1000); // requested 7 days; NWS live endpoint typically only retains ~2-3 days
+  const url = `https://api.weather.gov/stations/${stationId}/observations?start=${start.toISOString()}&end=${end.toISOString()}`;
+  try{
+    const r = await fetch(url, {headers:{'Accept':'application/geo+json'}});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    const rows = (d.features||[]).map(f=>{
+      const p=f.properties;
+      let rh = p.relativeHumidity&&p.relativeHumidity.value!=null?p.relativeHumidity.value:null;
+      let wind = p.windSpeed&&p.windSpeed.value!=null?msToMph(p.windSpeed.value):null;
+      if(p.windSpeed&&p.windSpeed.unitCode&&p.windSpeed.unitCode.indexOf('km_h')>=0&&p.windSpeed.value!=null){wind=p.windSpeed.value*0.621371;}
+      let gust = p.windGust&&p.windGust.value!=null?(p.windGust.unitCode&&p.windGust.unitCode.indexOf('km_h')>=0?p.windGust.value*0.621371:msToMph(p.windGust.value)):null;
+      return {t:new Date(p.timestamp), rh, wind, gust};
+    }).filter(r=>r.rh!=null||r.wind!=null).sort((a,b)=>b.t-a.t);
+    histCache[stationId]=rows;
+    return rows;
+  }catch(e){ return null; }
+}
+async function toggleHistory(key, stationId){
+  const el = document.getElementById('hist_'+key);
+  const showing = el.classList.contains('show');
+  if(showing){ el.classList.remove('show'); el.innerHTML=''; return; }
+  el.classList.add('show');
+  el.innerHTML = '<div class="histloading">Loading 7-day history…</div>';
+  const rows = await fetchHistory(stationId);
+  if(!rows){ el.innerHTML = '<div class="histloading">History unavailable for this station.</div>'; return; }
+  let tbl = '<table class="histtbl"><thead><tr><th>Time (local)</th><th>RH %</th><th>Wind mph</th><th>Gust</th></tr></thead><tbody>';
+  rows.forEach(r=>{
+    const rhBad = r.rh!=null && r.rh<RH_LIMIT;
+    const windBad = r.wind!=null && r.wind>WIND_LIMIT;
+    tbl += `<tr><td>${r.t.toLocaleString()}</td>`+
+      `<td class="${rhBad?'histbad':''}">${r.rh!=null?Math.round(r.rh)+'%':'—'}</td>`+
+      `<td class="${windBad?'histbad':''}">${r.wind!=null?r.wind.toFixed(1):'—'}</td>`+
+      `<td>${r.gust!=null?r.gust.toFixed(0):'—'}</td></tr>`;
+  });
+  tbl += '</tbody></table>';
+  const oldest = rows.length ? rows[rows.length-1].t : null;
+  const daysGot = oldest ? Math.round((new Date()-oldest)/(24*3600*1000)*10)/10 : 0;
+  const iemUrl = `https://mesonet.agron.iastate.edu/request/download.phtml?network=OR_ASOS`;
+  const note = `<div style="padding:6px 0;font-size:10.5px;color:#8B8A8A">NWS live feed returned ~${daysGot} day(s) of data (this endpoint typically retains only 2–3 days, regardless of the 7-day request). For a longer archive, use the <a href="${iemUrl}" target="_blank">IEM historical archive</a> for this station.</div>`;
+  el.innerHTML = tbl + note;
+}
 async function loadAll(){
   document.getElementById('updated').textContent='Fetching…';
   const cards=document.getElementById('cards');cards.innerHTML='';
@@ -148,11 +205,13 @@ async function loadAll(){
       </div>
       ${rfwHtml}
       <div class="metrics">
-        <div class="metric"><div class="mv ${rhBad?'bad':'ok'}">${rhTxt}</div><div class="ml">Rel. Humidity ${rhBad?'&lt;25':''}</div></div>
+        <div class="metric"><div class="mv ${rhBad?'bad':'ok'}">${rhTxt}</div><div class="ml">Rel. Humidity ${rhBad?'&lt;20':''}</div></div>
         <div class="metric"><div class="mv ${windBad?'bad':'ok'}">${windTxt}</div><div class="ml">Wind mph ${windBad?'&gt;6':''}</div></div>
         <div class="metric"><div class="mv" style="font-size:14px;color:#716F6F;padding-top:5px">${gustTxt}</div><div class="ml">Gust</div></div>
       </div>
-      <div class="note">${note}</div>`;
+      <div class="note">${note}</div>
+      <button class="histbtn" onclick="toggleHistory('${s.id}_${i}', '${s.id}')">📈 Show recent history</button>
+      <div class="histwrap" id="hist_${s.id}_${i}"></div>`;
     cards.appendChild(card);
   });
   const banner=document.getElementById('banner');
