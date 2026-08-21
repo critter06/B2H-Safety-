@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>B2H Safety Tools</title>
+<style>
+  :root{--infrared:#CD0A1B;--bolt:#F0941C;--carbon:#221F1F;--line:#DAD9D9;--paper:#F7F6F4;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Arial,sans-serif;background:var(--paper);color:var(--carbon)}
+  header{background:var(--carbon);color:#fff;padding:22px 20px;display:flex;align-items:center;gap:16px}
+  header .bar{width:6px;height:48px;background:var(--infrared);border-radius:2px}
+  header h1{font-size:19px;margin:0}
+  header .sub{font-size:12px;color:#B4B2A9;margin-top:3px}
+  main{max-width:820px;margin:0 auto;padding:26px 20px}
+  .tool{background:#fff;border:1px solid var(--line);border-left:6px solid var(--infrared);border-radius:10px;padding:20px;margin-bottom:16px;text-decoration:none;display:block;color:var(--carbon);transition:box-shadow .15s}
+  .tool:hover{box-shadow:0 2px 10px rgba(0,0,0,.08)}
+  .tool h2{font-size:16px;margin:0 0 6px;color:var(--carbon)}
+  .tool p{font-size:13px;color:#57544;color:#575454;margin:0;line-height:1.5}
+  .tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bolt);margin-bottom:6px}
+  footer{max-width:820px;margin:0 auto;padding:0 20px 30px;font-size:11px;color:#8B8A8A;line-height:1.6}
+</style></head><body>
+<header><div class="bar"></div><div>
+  <h1>B2H SAFETY TOOLS</h1>
+  <div class="sub">Boardman to Hemingway 500kV &middot; Project 032 &middot; QISG</div>
+</div></header>
+<main>
+  <a class="tool" href="B2H_Fire_Weather_Monitor.html">
+    <div class="tag">Live &middot; Real-Time</div>
+    <h2>🔥 Fire Weather Trigger Monitor</h2>
+    <p>Live RH, wind, temperature, and NWS Red Flag Warning status across all six corridor segments. Flags shutdown conditions (RH &lt; 20% and wind &gt; 6 mph) in real time, with 7-day recent history per zone.</p>
+  </a>
+  <a class="tool" href="B2H_Federal_Weather_Lookup.html">
+    <div class="tag">Historical Lookup</div>
+    <h2>📅 Federal Land Weather Lookup</h2>
+    <p>Pick any BLM or USFS structure (311 total) and any past date to get a direct link to that station's historical RH, wind, and temperature records.</p>
+  </a>
+  <a class="tool" href="B2H_Daily_Fire_Hazard_Generator.html">
+    <div class="tag">Daily &middot; USFS Requirement</div>
+    <h2>📋 Daily Fire Hazard Assessment Generator</h2>
+    <p>Builds the required 6:00 AM / 10:00 AM / 2:00 PM Pacific notification email &mdash; fire danger ratings for USFS land (Union Co. OR), BLM land (Umatilla/Baker/Malheur Co. OR), and BLM land (Owyhee Co. ID).</p>
+  </a>
+</main>
+<footer>
+  Questions: QISG Safety &mdash; Chris Adams, 208-954-0576. Verify conditions independently at bmidc.org and gacc.nifc.gov before acting on any tool output.
+</footer>
+</body></html>
