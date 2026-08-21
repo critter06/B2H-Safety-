@@ -50,7 +50,7 @@
         </select>
       </div>
       <div><label>Date</label><input type="date" id="dt"/></div>
-      <div style="flex:2;min-width:280px"><label>Recipients (comma-separated — edit as needed)</label><textarea id="recips" rows="3" style="width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-family:inherit;resize:vertical">Kate.Fent@usda.gov, jack.mcguire@powereng.co, mottenlips@idahopower.com, anthony.guillen@quantaisg.com, BMBeverage@quantaisg.com, AJRichards@probstelectric.com, tdcoleman@summitlineconstruction.com, awspencer@summitlineconstruction.com, bparrish@cruxsub.com, blangston@mgdyess.com, jglenn@mgdyess.com, econiglio@eocene.com, ncarrara@eocene.com, kwienke@eocene.com, jbryant3@eocene.com, msowden@probstelectric.com, nwalder@summitlineconstruction.com, joseph.walton@quantaisg.com, jesjones@bnclearing.com, James.Jones@brinkred.com, Kellye.Cook@mjelectric.com, JLarson@quantaisg.com, VKlemm@phasorengineeringllc.com, tdmeyers@cruxsub.com, dsjoden@cruxsub.com, HASjoden@cruxsub.com, GTippett@CruxSub.com, rpetterson@pfsolutions.com, joshua.verran@mjelectric.com, kyle.sabotta@mjelectric.com, justin.cerna@summitlineconstruction.com, DMColeman@summitlineconstruction.com, jkhouse@cruxsub.com, JDMiller@probstelectric.com, BCChatfield@probstelectric.com</textarea></div>
+      <div style="flex:2;min-width:280px"><label>Recipients (comma-separated — edit as needed)</label><textarea id="recips" rows="3" style="width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-family:inherit;resize:vertical">Kate.Fent@usda.gov, jack.mcguire@powereng.co, mottenlips@idahopower.com, anthony.guillen@quantaisg.com, BMBeverage@quantaisg.com, AJRichards@probstelectric.com, tdcoleman@summitlineconstruction.com, awspencer@summitlineconstruction.com, bparrish@cruxsub.com, blangston@mgdyess.com, jglenn@mgdyess.com, econiglio@eocene.com, ncarrara@eocene.com, kwienke@eocene.com, jbryant3@eocene.com, msowden@probstelectric.com, nwalder@summitlineconstruction.com, joseph.walton@quantaisg.com, jesjones@bnclearing.com, James.Jones@brinkred.com, Kellye.Cook@mjelectric.com, JLarson@quantaisg.com, VKlemm@phasorengineeringllc.com, tdmeyers@cruxsub.com, dsjoden@cruxsub.com, HASjoden@cruxsub.com, GTippett@CruxSub.com, rpetterson@pfsolutions.com, joshua.verran@mjelectric.com, kyle.sabotta@mjelectric.com, justin.cerna@summitlineconstruction.com, DMColeman@summitlineconstruction.com, jkhouse@cruxsub.com, JDMiller@probstelectric.com, BCChatfield@probstelectric.com, erik.nyquist@wsp.com, jack.mcguire@wsp.com</textarea></div>
     </div>
   </div>
 
@@ -64,9 +64,9 @@
         <div><label>Fire Danger Rating</label>
           <select id="r1"><option value="">Select…</option><option>Low</option><option>Moderate</option><option>High</option><option>Very High</option><option>Extreme</option></select>
         </div>
-        <div><label>IFPL / Restriction Level (optional)</label><input type="text" id="ifpl1" placeholder="e.g. IFPL II"/></div>
+        <div><label>Weather Conditions</label><input type="text" id="ifpl1" placeholder="e.g. Hot, dry, breezy"/></div>
       </div>
-      <a class="srclink" href="https://bmidc.org/fire-danger.shtml" target="_blank">→ Check current rating at BMIDC Current Conditions</a>
+      <a class="srclink" href="https://bmidc.org/fire-danger.shtml" target="_blank">→ Check current rating at BMIDC Current Conditions</a><br><a class="srclink" href="http://pnwwildfireplanning.pythonanywhere.com/nfdrs/r6map/" target="_blank">→ Or check Region 6 FDRA Map</a>
     </div>
 
     <div class="scope">
@@ -76,9 +76,9 @@
         <div><label>Fire Danger Rating</label>
           <select id="r2"><option value="">Select…</option><option>Low</option><option>Moderate</option><option>High</option><option>Very High</option><option>Extreme</option></select>
         </div>
-        <div><label>Restriction Level (optional)</label><input type="text" id="ifpl2" placeholder="e.g. Stage 2"/></div>
+        <div><label>Weather Conditions</label><input type="text" id="ifpl2" placeholder="e.g. Warm, calm"/></div>
       </div>
-      <a class="srclink" href="https://bmidc.org/fire-danger.shtml" target="_blank">→ Check current rating at BMIDC Current Conditions</a>
+      <a class="srclink" href="https://bmidc.org/fire-danger.shtml" target="_blank">→ Check current rating at BMIDC Current Conditions</a><br><a class="srclink" href="http://pnwwildfireplanning.pythonanywhere.com/nfdrs/r6map/" target="_blank">→ Or check Region 6 FDRA Map</a>
     </div>
 
     <div class="scope">
@@ -88,7 +88,7 @@
         <div><label>Fire Danger Rating</label>
           <select id="r3"><option value="">Select…</option><option>Low</option><option>Moderate</option><option>High</option><option>Very High</option><option>Extreme</option></select>
         </div>
-        <div><label>Restriction Level (optional)</label><input type="text" id="ifpl3" placeholder="e.g. Stage 1"/></div>
+        <div><label>Weather Conditions</label><input type="text" id="ifpl3" placeholder="e.g. Clear, low wind"/></div>
       </div>
       <a class="srclink" href="https://gacc.nifc.gov/gbcc/dispatch/id-bdc/index.php" target="_blank">→ Check current rating at Boise Interagency Dispatch Center</a>
     </div>
@@ -105,10 +105,41 @@
   </div>
 </main>
 <footer>
-  This tool does not send email automatically — it assembles the required Daily Fire Hazard Assessment content so it can be reviewed and sent (manually, or via your organization's email automation such as Power Automate) at 6:00 AM, 10:00 AM, and 2:00 PM Pacific as required by USFS. Verify each rating at the linked source before sending; ratings are not fetched automatically by this tool.
+  Your recipients list and entries auto-save in this browser (no need for a new link) — they'll be here next time you open this page on this device. This tool does not send email automatically — it assembles the required Daily Fire Hazard Assessment content so it can be reviewed and sent (manually, or via your organization's email automation such as Power Automate) at 6:00 AM, 10:00 AM, and 2:00 PM Pacific as required by USFS. Verify each rating at the linked source before sending; ratings are not fetched automatically by this tool.
 </footer>
 <script>
 document.getElementById('dt').valueAsDate = new Date();
+
+// --- Auto-save: remembers field values in this browser so edits persist without a new file/link ---
+const AUTOSAVE_FIELDS = ['recips','r1','ifpl1','r2','ifpl2','r3','ifpl3'];
+const STORAGE_KEY = 'b2h_fire_hazard_autosave';
+
+function loadAutosave(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    AUTOSAVE_FIELDS.forEach(id=>{
+      if(saved[id] !== undefined){
+        const el = document.getElementById(id);
+        if(el) el.value = saved[id];
+      }
+    });
+  }catch(e){ /* ignore corrupt storage */ }
+}
+function saveAutosave(){
+  const data = {};
+  AUTOSAVE_FIELDS.forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) data[id] = el.value;
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+// Restore any previously saved values (recipients box keeps its pre-filled default the first time this ever runs)
+loadAutosave();
+// Save on every change so nothing is lost on reload/close
+AUTOSAVE_FIELDS.forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', saveAutosave);
+});
 
 function generate(){
   const slot = document.getElementById('slot').value;
@@ -134,14 +165,14 @@ This notification is provided to all applicable agencies and construction person
 -------------------------------------------------------
 1. USFS LANDS — UNION COUNTY, OR
    (Wallowa-Whitman National Forest, incl. structures 90/4–99/1)
-   Fire Danger Rating: ${r1}${ifpl1 ? '\n   Restriction Level: '+ifpl1 : ''}
+   Fire Danger Rating: ${r1}${ifpl1 ? '\n   Weather Conditions: '+ifpl1 : ''}
 
 2. BLM LANDS — UMATILLA / BAKER / MALHEUR COUNTIES, OR
-   Fire Danger Rating: ${r2}${ifpl2 ? '\n   Restriction Level: '+ifpl2 : ''}
+   Fire Danger Rating: ${r2}${ifpl2 ? '\n   Weather Conditions: '+ifpl2 : ''}
 
 3. BLM LANDS — OWYHEE COUNTY, ID
    (Boise District, Great Basin GACC)
-   Fire Danger Rating: ${r3}${ifpl3 ? '\n   Restriction Level: '+ifpl3 : ''}
+   Fire Danger Rating: ${r3}${ifpl3 ? '\n   Weather Conditions: '+ifpl3 : ''}
 -------------------------------------------------------
 
 Ratings verified against:
