@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>B2H Daily Fire Hazard Assessment Generator</title>
+<style>
+  :root{--infrared:#CD0A1B;--bolt:#F0941C;--carbon:#221F1F;--line:#DAD9D9;--paper:#F7F6F4;--go:#1C7C3C;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Arial,sans-serif;background:var(--paper);color:var(--carbon)}
+  header{background:var(--carbon);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px}
+  header .bar{width:6px;height:44px;background:var(--infrared);border-radius:2px}
+  header h1{font-size:17px;margin:0}
+  header .sub{font-size:11px;color:#B4B2A9;margin-top:2px}
+  main{max-width:880px;margin:0 auto;padding:20px 18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}
+  .card h2{font-size:13px;margin:0 0 12px;color:var(--infrared);text-transform:uppercase;letter-spacing:.4px}
+  .scope{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px;background:#FBFBFA}
+  .scope-title{font-weight:700;font-size:13px;margin-bottom:2px}
+  .scope-sub{font-size:11px;color:#716F6F;margin-bottom:10px}
+  .scope-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+  .scope-row > div{flex:1;min-width:160px}
+  label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#716F6F;margin-bottom:5px}
+  select,input{width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-family:inherit}
+  a.srclink{display:inline-block;margin-top:8px;font-size:12px;color:var(--infrared);text-decoration:none;font-weight:600}
+  a.srclink:hover{text-decoration:underline}
+  .toprow{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .toprow > div{flex:1;min-width:160px}
+  button{background:var(--infrared);color:#fff;border:none;padding:12px 20px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
+  button:hover{background:#a80916}
+  .out{margin-top:16px;padding:16px;background:#FBFBFA;border:1px dashed var(--line);border-radius:8px;display:none;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:12.5px;line-height:1.6}
+  .out.show{display:block}
+  .actions{display:flex;gap:10px;margin-top:10px}
+  .actions a,.actions button{flex:1;text-align:center;text-decoration:none;padding:9px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn-copy{background:var(--carbon);color:#fff;border:none}
+  .btn-mail{background:var(--go);color:#fff}
+  footer{max-width:880px;margin:0 auto;padding:0 18px 24px;font-size:11px;color:#8B8A8A;line-height:1.6}
+</style></head><body>
+<header><div class="bar"></div><div>
+  <h1>DAILY FIRE HAZARD ASSESSMENT — EMAIL GENERATOR</h1>
+  <div class="sub">B2H 500kV · Project 032 · QISG · Required USFS notification: 6:00 AM / 10:00 AM / 2:00 PM Pacific</div>
+</div></header>
+<main>
+  <div class="card">
+    <h2>1. Send Details</h2>
+    <div class="toprow">
+      <div><label>Send Time Slot</label>
+        <select id="slot">
+          <option value="6:00 AM">6:00 AM Pacific</option>
+          <option value="10:00 AM">10:00 AM Pacific</option>
+          <option value="2:00 PM">2:00 PM Pacific</option>
+        </select>
+      </div>
+      <div><label>Date</label><input type="date" id="dt"/></div>
+      <div><label>Recipients (comma-separated)</label><input type="text" id="recips" placeholder="e.g. justin.b.lauer@odf.oregon.gov, ..."/></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Today's Fire Danger Ratings — Check Source, Then Select</h2>
+
+    <div class="scope">
+      <div class="scope-title">USFS Lands — Union County, OR</div>
+      <div class="scope-sub">Wallowa-Whitman National Forest (includes B2H structures 90/4–99/1)</div>
+      <div class="scope-row">
+        <div><label>Fire Danger Rating</label>
+          <select id="r1"><option value="">Select…</option><option>Low</option><option>Moderate</option><option>High</option><option>Very High</option><option>Extreme</option></select>
+        </div>
+        <div><label>IFPL / Restriction Level (optional)</label><input type="text" id="ifpl1" placeholder="e.g. IFPL II"/></div>
+      </div>
+      <a class="srclink" href="https://bmidc.org/fire-danger.shtml" target="_blank">→ Check current rating at BMIDC Current Conditions</a>
+    </div>
+
+    <div class="scope">
+      <div class="scope-title">BLM Lands — Umatilla, Baker &amp; Malheur Counties, OR</div>
+      <div class="scope-sub">Vale District BLM (and Prineville District for northern Umatilla parcels)</div>
+      <div class="scope-row">
+        <div><label>Fire Danger Rating</label>
+          <select id="r2"><option value="">Select…</option><option>Low</option><option>Moderate</option><option>High</option><option>Very High</option><option>Extreme</option></select>
+        </div>
+        <div><label>Restriction Level (optional)</label><input type="text" id="ifpl2" placeholder="e.g. Stage 2"/></div>
+      </div>
+      <a class="srclink" href="https://bmidc.org/fire-danger.shtml" target="_blank">→ Check current rating at BMIDC Current Conditions</a>
+    </div>
+
+    <div class="scope">
+      <div class="scope-title">BLM Lands — Owyhee County, ID</div>
+      <div class="scope-sub">Bureau of Land Management, Boise District (Great Basin GACC)</div>
+      <div class="scope-row">
+        <div><label>Fire Danger Rating</label>
+          <select id="r3"><option value="">Select…</option><option>Low</option><option>Moderate</option><option>High</option><option>Very High</option><option>Extreme</option></select>
+        </div>
+        <div><label>Restriction Level (optional)</label><input type="text" id="ifpl3" placeholder="e.g. Stage 1"/></div>
+      </div>
+      <a class="srclink" href="https://gacc.nifc.gov/gbcc/dispatch/id-bdc/index.php" target="_blank">→ Check current rating at Boise Interagency Dispatch Center</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. Generate</h2>
+    <button onclick="generate()">Generate Email</button>
+    <div class="out" id="out"></div>
+    <div class="actions" id="actions" style="display:none">
+      <button class="btn-copy" onclick="copyOut()">📋 Copy to Clipboard</button>
+      <a class="btn-mail" id="mailBtn" href="#">✉️ Open in Mail App</a>
+    </div>
+  </div>
+</main>
+<footer>
+  This tool does not send email automatically — it assembles the required Daily Fire Hazard Assessment content so it can be reviewed and sent (manually, or via your organization's email automation such as Power Automate) at 6:00 AM, 10:00 AM, and 2:00 PM Pacific as required by USFS. Verify each rating at the linked source before sending; ratings are not fetched automatically by this tool.
+</footer>
+<script>
+document.getElementById('dt').valueAsDate = new Date();
+
+function generate(){
+  const slot = document.getElementById('slot').value;
+  const dt = document.getElementById('dt').value;
+  const recips = document.getElementById('recips').value || '[recipient list]';
+  const r1 = document.getElementById('r1').value || '[NOT SET]';
+  const r2 = document.getElementById('r2').value || '[NOT SET]';
+  const r3 = document.getElementById('r3').value || '[NOT SET]';
+  const ifpl1 = document.getElementById('ifpl1').value;
+  const ifpl2 = document.getElementById('ifpl2').value;
+  const ifpl3 = document.getElementById('ifpl3').value;
+
+  const dateStr = dt ? new Date(dt+'T00:00:00').toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '[date]';
+
+  const subject = `Daily Fire Hazard Assessment — ${dateStr} — ${slot} PT — B2H Project 032`;
+
+  const body = `DAILY FIRE HAZARD ASSESSMENT NOTIFICATION
+B2H 500kV Transmission Line — Project 032 — QISG
+${dateStr}  |  ${slot} Pacific Time
+
+This notification is provided to all applicable agencies and construction personnel per USFS requirement.
+
+-------------------------------------------------------
+1. USFS LANDS — UNION COUNTY, OR
+   (Wallowa-Whitman National Forest, incl. structures 90/4–99/1)
+   Fire Danger Rating: ${r1}${ifpl1 ? '\n   Restriction Level: '+ifpl1 : ''}
+
+2. BLM LANDS — UMATILLA / BAKER / MALHEUR COUNTIES, OR
+   Fire Danger Rating: ${r2}${ifpl2 ? '\n   Restriction Level: '+ifpl2 : ''}
+
+3. BLM LANDS — OWYHEE COUNTY, ID
+   (Boise District, Great Basin GACC)
+   Fire Danger Rating: ${r3}${ifpl3 ? '\n   Restriction Level: '+ifpl3 : ''}
+-------------------------------------------------------
+
+Ratings verified against:
+ - BMIDC Current Conditions (bmidc.org/fire-danger.shtml) — Union/Umatilla/Baker/Malheur
+ - Boise Interagency Dispatch Center (gacc.nifc.gov/gbcc/dispatch/id-bdc) — Owyhee County ID
+
+Questions or discrepancies: contact QISG Safety — Chris Adams, 208-954-0576.
+
+This is an automated-format assessment generated for the required 6:00 AM / 10:00 AM / 2:00 PM Pacific notification schedule.`;
+
+  document.getElementById('out').textContent = `TO: ${recips}\nSUBJECT: ${subject}\n\n${body}`;
+  document.getElementById('out').className = 'out show';
+  document.getElementById('actions').style.display = 'flex';
+  document.getElementById('mailBtn').href = `mailto:${encodeURIComponent(recips)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+function copyOut(){
+  const txt = document.getElementById('out').textContent;
+  navigator.clipboard.writeText(txt).then(()=>alert('Copied to clipboard'));
+}
+</script>
+</body></html>
