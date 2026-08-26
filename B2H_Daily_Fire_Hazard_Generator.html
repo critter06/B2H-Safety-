@@ -102,6 +102,9 @@
       <button class="btn-copy" onclick="copyOut()">📋 Copy to Clipboard</button>
       <a class="btn-mail" id="mailBtn" href="#">✉️ Open in Mail App</a>
     </div>
+    <div id="linkNote" style="display:none;margin-top:8px;font-size:11px;color:#716F6F;line-height:1.5">
+      <b>For clickable links:</b> use <b>Copy to Clipboard</b>, then paste into Outlook/Gmail's compose window (Ctrl+V) — the links will be clickable. The <b>Open in Mail App</b> button opens a plain-text draft; email links can never be made clickable that way (a limitation of how mailto links work everywhere, not this tool).
+    </div>
   </div>
 </main>
 <footer>
@@ -190,11 +193,46 @@ This is an automated-format assessment generated for the required 6:00 AM / 10:0
   document.getElementById('out').textContent = `TO: ${recips}\nSUBJECT: ${subject}\n\n${body}`;
   document.getElementById('out').className = 'out show';
   document.getElementById('actions').style.display = 'flex';
+  document.getElementById('linkNote').style.display = 'block';
   document.getElementById('mailBtn').href = `mailto:${encodeURIComponent(recips)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  // Build an HTML version with real clickable <a> links for the Copy button.
+  // (mailto: bodies are plain-text only by spec, so the "Open in Mail App" button
+  // can never carry real hyperlinks -- this is a platform limitation, not a bug.
+  // Pasting the HTML version below into Outlook/Gmail's rich-text compose window
+  // gives guaranteed clickable links, unlike plain text which depends on the
+  // recipient client's auto-link detection.)
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const escapeHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const htmlBody = escapeHtml(`TO: ${recips}
+SUBJECT: ${subject}
+
+${body}`)
+    .replace(urlRegex, url => `<a href="${url}">${url}</a>`)
+    .replace(/\n/g, '<br>');
+  window.__b2hHtmlBody = `<div style="font-family:Courier New,monospace;font-size:13px;white-space:pre-wrap">${htmlBody}</div>`;
+  window.__b2hPlainBody = `TO: ${recips}\nSUBJECT: ${subject}\n\n${body}`;
 }
-function copyOut(){
-  const txt = document.getElementById('out').textContent;
-  navigator.clipboard.writeText(txt).then(()=>alert('Copied to clipboard'));
+async function copyOut(){
+  const plain = window.__b2hPlainBody || document.getElementById('out').textContent;
+  const html = window.__b2hHtmlBody;
+  try{
+    if(html && window.ClipboardItem){
+      const item = new ClipboardItem({
+        'text/plain': new Blob([plain], {type:'text/plain'}),
+        'text/html': new Blob([html], {type:'text/html'})
+      });
+      await navigator.clipboard.write([item]);
+      alert('Copied! Paste into Outlook/Gmail for clickable links. (Note: plain text editors will show the raw URLs instead.)');
+    } else {
+      await navigator.clipboard.writeText(plain);
+      alert('Copied to clipboard (plain text \u2014 your browser doesn\u2019t support rich copy, so links may not be clickable after pasting).');
+    }
+  }catch(e){
+    // fallback if rich clipboard write is blocked
+    await navigator.clipboard.writeText(plain);
+    alert('Copied as plain text (rich copy was blocked by the browser).');
+  }
 }
 </script>
 </body></html>
