@@ -41,6 +41,7 @@
   .mv.bad{color:var(--stop)}.mv.ok{color:var(--go)}
   .note{padding:8px 14px;font-size:11px;color:#716F6F;border-top:1px dashed var(--line);background:#FBFBFA}
   footer{padding:14px 18px;font-size:11px;color:#8B8A8A;border-top:1px solid var(--line);line-height:1.6}
+  footer a{color:var(--infrared);text-decoration:underline;font-weight:600}
   .banner{padding:10px 18px;font-size:13px;font-weight:600;text-align:center}
   .banner.anystop{background:#FBE3E5;color:var(--stop)}
   .banner.allgo{background:#E1F2E7;color:var(--go)}
@@ -82,7 +83,7 @@
 <div id="rfwGlobalBanner"></div>
 <main id="cards"></main>
 <footer>
-  <b>How this works:</b> Pulls current relative humidity and wind speed from the nearest NWS station to each corridor segment (api.weather.gov, updates ~hourly), and separately checks api.weather.gov/alerts/active for any official <b>Red Flag Warning</b> or <b>Fire Weather Watch</b> covering that segment's coordinates. A segment shows <b>SHUTDOWN</b> when RH is below 20% AND sustained wind exceeds 6 mph — both conditions must be true. The Red Flag indicator is separate and independent — it reflects the National Weather Service's own official warning product, which uses different criteria and can be active even when the project's RH/wind trigger is not, or vice versa. Treat a Red Flag Warning as a serious independent signal regardless of the project trigger's status.<br>
+  <b>How this works:</b> Pulls current relative humidity and wind speed from the nearest NWS station to each corridor segment (<a href="https://www.weather.gov/documentation/services-web-api" target="_blank">api.weather.gov</a>, updates ~hourly), and separately checks <a href="https://www.weather.gov/documentation/services-web-api" target="_blank">api.weather.gov/alerts/active</a> for any official <b>Red Flag Warning</b> or <b>Fire Weather Watch</b> covering that segment's coordinates. A segment shows <b>SHUTDOWN</b> when RH is below 20% AND sustained wind exceeds 6 mph — both conditions must be true. The Red Flag indicator is separate and independent — it reflects the National Weather Service's own official warning product, which uses different criteria and can be active even when the project's RH/wind trigger is not, or vice versa. Treat a Red Flag Warning as a serious independent signal regardless of the project trigger's status.<br>
   <b>Important:</b> Station readings represent the nearest ASOS/airport, which may differ from on-site conditions in canyons, ridgetops, or river/valley segments. Station data does not replace on-site measurement — crews must verify with a calibrated handheld at the work location and log readings. When in doubt, stop. · Stations: KHRI, KPDT, KMEH, KLGD, KBKE, KONO. <b>7-day history</b> (per-zone button) pulls actual past hourly NWS observations for that station — useful for spotting trends, not just the current snapshot.
 </footer>
 <script>
